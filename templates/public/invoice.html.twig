@@ -1,0 +1,54 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+	{% if invoice.isCompleted %}
+		<span style="color:green">Completed</span>
+	{% endif %}
+	<h1>{{ invoice.date|date('m/d/Y') }} {{ invoice.client.name }} - {{ invoice.name }}</h1>
+	<h2>Invoice period: {{ invoice.periodStart|date('m/d/Y') }} - {{ invoice.periodEnd|date('m/d/Y') }}</h2>
+	{% if invoice.description %}
+		<div>
+			<em>{{ invoice.description|raw }}</em>
+		</div>
+	{% endif %}
+	<table>
+		<tbody>
+			{% for item in invoice.items %}
+				<tr>
+					<td align="right">
+						{{ item.quantity }}
+					</td>
+					<td>
+						{{ item.name }}
+						{% if item.url is not empty %}
+							<br>
+							<small><a href="{{ item.url }}" target="_blank">{{ item.url|length > 50 ? item.url|slice(0,50) ~ '...' : item.url }}</a></small>
+						{% endif %}
+						{% if item.description is not empty %}
+							<br>
+							<small>{{ item.description|raw }}</small>
+						{% endif %}
+					</td>
+					<td align="right">
+						{{ item.unitPrice }}
+					</td>
+					<td align="right">
+						{{ item.lineTotal }}
+					</td>
+				</tr>
+			{% endfor %}
+			<tr>
+				<td colspan="3" align="right">
+					Total
+				</td>
+				<td align="right">
+					{% if invoice.isCompleted %}
+						<span style="color:green;font-weight:bold;">(Completed) {{ invoice.subtotal }}</span>
+					{% else %}
+						{{ invoice.subtotal }}
+					{% endif %}
+				</td>
+			</tr>
+		</tbody>
+	</table>
+{% endblock %}

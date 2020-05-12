@@ -1,0 +1,49 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+	<form action="{{ path('create_client') }}" method="post">
+		<h2>Add a new Client</h2>
+		<label for="client_name">Name</label>
+		<input type="text" id="client_name" name="name" placeholder="Enter name" required>
+		<input type="hidden" name="_redirect" value="{{ app.request.get('_route') }}">
+		<button type="submit">Add</button>
+	</form>
+	{% if clients %}
+		<table>
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>Invoices</th>
+					<th>Contacts</th>
+					<th>Keys</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for client in clients %}
+					<tr>
+						<td>
+							{{ client.name }}<br>
+							<small>{{ client.uuid }}</small>
+						</td>
+						<td>
+							<a href="{{ path('invoices_for_client', {clientUuid:client.uuid}) }}">{{ client.invoices|length }}</a>
+						</td>
+						<td>
+							-
+						</td>
+						<td>
+							{{ client.accessKeys|length }}
+						</td>
+						<td>
+
+							<a href="{{ path('delete_client', {uuid:client.uuid, redirect:app.request.get('_route')}) }}" onclick="return confirm('Delete this client?')">Delete</a>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	{% else %}
+		<p>No clients found</p>
+	{% endif %}
+{% endblock %}

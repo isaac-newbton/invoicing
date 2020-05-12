@@ -1,0 +1,13 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+	<h1>Invoices for {{ client.name }}</h1>
+	<div>
+		<a href="{{ path('create_invoice', {clientUuid:client.uuid}) }}">New Invoice</a>
+	</div>
+	{% if client.invoices|length > 0 %}
+		{{ client.invoices|length }}
+	{% else %}
+		<p>No invoices for this client.</p>
+	{% endif %}
+{% endblock %}

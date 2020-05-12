@@ -1,0 +1,72 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+	<h1>{{ client.name }} Invoices</h1>
+	<p>Click on any invoice that is not canceled to view details.</p>
+	<table>
+		<thead>
+			<tr>
+				<th>
+					Status
+				</th>
+				<th>
+					Date
+				</th>
+				<th>
+					Name
+				</th>
+				<th>
+					Period
+				</th>
+				<th>
+					Total
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for invoice in client.invoices %}
+				<tr>
+					<td>
+						{% if invoice.isCanceled %}
+							<span style="color:red;">Canceled</span>
+						{% else %}
+							{% if invoice.isCompleted %}
+								<span style="color:green;">Completed</span>
+							{% else %}
+								<strong>Open</strong>
+							{% endif %}
+						{% endif %}
+					</td>
+					<td>
+						{{ invoice.date|date('m/d/Y') }}
+					</td>
+					<td>
+						{% if invoice.isCanceled %}
+							<strike>{{ invoice.name }}</strike>
+						{% else %}
+							<a href="{{ path('client_view_invoice', {clientUuid:client.uuid, invoiceUuid:invoice.uuid}) }}">{{ invoice.name }}</a>
+						{% endif %}
+						{% if invoice.description is not empty %}
+							<br>
+							<small>{{ invoice.description|raw }}</small>
+						{% endif %}
+					</td>
+					<td>
+						{{ invoice.periodStart|date('m/d/Y') }} - {{ invoice.periodEnd|date('m/d/Y') }}
+					</td>
+					<td>
+						{% if invoice.isCanceled %}
+							<span style="color:red;">Canceled</span>
+						{% else %}
+							{% if invoice.isCompleted %}
+								<strike style="color:green;">{{ invoice.subtotal }}</strike>
+							{% else %}
+								<strong>{{ invoice.subtotal }}</strong>
+							{% endif %}
+						{% endif %}
+					</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% endblock %}

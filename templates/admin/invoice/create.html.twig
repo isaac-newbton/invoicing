@@ -1,0 +1,27 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+	<h1>Add invoice for {{ client.name }}</h1>
+	<form action="{{ path('create_invoice', {clientUuid:client.uuid}) }}" method="post">
+		<input type="hidden" name="_redirect" value="admin_dashboard">
+		<div>
+			<label for="periodStart">Period</label>
+			<input type="date" name="periodStart" id="periodStart" required value="{{ 'now'|date('Y-m-d') }}"> - <input type="date" name="periodEnd" id="periodEnd" required value="{{ 'now'|date('Y-m-d') }}">
+		</div>
+		<div>
+			<label for="name">Name</label><br>
+			<input type="text" name="name" id="name" required placeholder="Name">
+		</div>
+		<div>
+			<label for="description">Description</label><br>
+			<textarea name="description" id="description" rows="5"></textarea>
+		</div>
+		<div>
+			<label for="date">Date</label>
+			<input type="date" name="date" id="date" required value="{{ 'now'|date('Y-m-d') }}">
+		</div>
+		<div>
+			<button type="submit">Add</button>
+		</div>
+	</form>
+{% endblock %}
