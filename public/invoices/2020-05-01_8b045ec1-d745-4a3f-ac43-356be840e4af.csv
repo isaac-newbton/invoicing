@@ -1,0 +1,8 @@
+Invoice Date,2020-05-01
+Interval Start,2020-04-01
+Interval End,2020-04-24
+
+Job,Description,Qty/Hrs,Rate,Amount
+"Hours","",120.00,$25.00,$3000.00
+"OT2","",11.00,$37.50,$412.50
+,,,,$3412.50

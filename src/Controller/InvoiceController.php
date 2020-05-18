@@ -6,10 +6,15 @@ use App\Entity\InvoiceItem;
 use App\Repository\ClientRepository;
 use App\Repository\InvoiceItemRepository;
 use App\Repository\InvoiceRepository;
+use App\Service\InvoiceFileService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Filesystem\Exception\IOException;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Mime\FileinfoMimeTypeGuesser;
 use Symfony\Component\Routing\Annotation\Route;
 
 class InvoiceController extends AbstractController{
@@ -175,5 +180,43 @@ class InvoiceController extends AbstractController{
 			return new Response("<html><body>That invoice is empty.</body></html>", 409);
 		}
 		return $this->render('public/invoice.html.twig', ['invoice'=>$invoice]);
+	}
+
+	/**
+	 * @Route("/client/{clientUuid}/invoice/{invoiceUuid}/download", name="client_download_invoice", methods={"GET"})
+	 */
+	public function clientDownloadInvoice(string $clientUuid, string $invoiceUuid, ClientRepository $clientRepository, InvoiceRepository $invoiceRepository, InvoiceFileService $invoiceFileService){
+		$client = $clientRepository->findOneBy(['uuid'=>$clientUuid]);
+		$invoice = $invoiceRepository->findOneBy(['uuid'=>$invoiceUuid]);
+		if(!$client || !$invoice){
+			return new Response("<html><body>That invoice was not found.</body></html>", 404);
+		}
+		if($invoice->getClient()!=$client){
+			return new Response("<html><body>Permission to view that invoice is blocked.</body></html>", 403);
+		}
+		if($invoice->getIsCanceled()){
+			return new Response("<html><body>That invoice has been marked canceled.</body></html>", 410);
+		}
+		if(0===count($invoice->getItems())){
+			return new Response("<html><body>That invoice is empty.</body></html>", 409);
+		}
+
+		try{
+			$filePath = $invoiceFileService->generateCsv($invoice);
+			$response = new BinaryFileResponse($filePath);
+			$mime = new FileinfoMimeTypeGuesser();
+			if($mime->isGuesserSupported()){
+				$response->headers->set('Content-Type', $mime->guessMimeType($filePath));
+			}else{
+				$response->headers->set('Content-Type', 'text/plain');
+			}
+			$response->setContentDisposition(
+				ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+				"invoice_{$invoice->getDate()->format('Y-m-d')}_{$invoice->getUuid()}.csv"
+			);
+			return $response;
+		}catch(IOException $exception){
+			return new Response("<html><body>IOException: {$exception->getMessage()}</body></html>");
+		}
 	}
 }
