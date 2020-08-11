@@ -240,7 +240,7 @@ class InvoiceController extends AbstractController{
 			$manager = $this->getDoctrine()->getManager();
 			$manager->persist($item);
 			$manager->flush();
-			return $this->redirectToRoute('admin_edit_invoice', ['uuid'=>$item->getInvoice()->getUuid()]);
+			return $this->redirectToRoute('edit_invoice', ['uuid'=>$item->getInvoice()->getUuid()]);
 		}
 
 		return $this->render('admin/invoice/edit_item.html.twig', ['form'=>$form->createView()]);
