@@ -3,6 +3,7 @@ namespace App\Controller;
 
 use App\Entity\Invoice;
 use App\Entity\InvoiceItem;
+use App\Form\InvoiceItemType;
 use App\Repository\ClientRepository;
 use App\Repository\InvoiceItemRepository;
 use App\Repository\InvoiceRepository;
@@ -218,5 +219,30 @@ class InvoiceController extends AbstractController{
 		}catch(IOException $exception){
 			return new Response("<html><body>IOException: {$exception->getMessage()}</body></html>");
 		}
+	}
+
+	/**
+	 * @Route("/admin/invoice/edit_item/{uuid}", name="edit_invoice_item")
+	 */
+	public function editItem(string $uuid, Request $request, InvoiceItemRepository $invoiceItemRepository){
+		/**
+		 * @var InvoiceItem|null
+		 */
+		$item = $invoiceItemRepository->findOneBy(['uuid'=>$uuid]);
+		if(!$item){
+			return $this->redirectToRoute('admin_dashboard');
+		}
+
+		$form = $this->createForm(InvoiceItemType::class, $item);
+		$form->handleRequest($request);
+		if($form->isSubmitted() && $form->isValid()){
+			$item = $form->getData();
+			$manager = $this->getDoctrine()->getManager();
+			$manager->persist($item);
+			$manager->flush();
+			return $this->redirectToRoute('admin_edit_invoice', ['uuid'=>$item->getInvoice()->getUuid()]);
+		}
+
+		return $this->render('admin/invoice/edit_item.html.twig', ['form'=>$form->createView()]);
 	}
 }
